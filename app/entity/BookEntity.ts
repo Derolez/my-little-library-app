@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { ObjectId } from "mongodb";
-import { genTimestampsSchema } from 'mongoose-zod';
 
 const bookBaseSchema = z.object({
   _id: z.instanceof(ObjectId),
@@ -13,9 +12,11 @@ const bookBaseSchema = z.object({
   loanableStatus: z.enum(["available on site", "loanable"]),
   summary: z.string().optional(),
   coverURL: z.string().url().optional(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
 });
 
-export const bookEntitySchema = bookBaseSchema.merge(genTimestampsSchema('crAt', 'upAt')).mongoose();
+export const bookEntitySchema = bookBaseSchema;
 
 export type BookEntity = z.infer<typeof bookEntitySchema>;
 
