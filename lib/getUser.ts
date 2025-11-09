@@ -21,7 +21,7 @@ export async function getUser() {
       id: String(user._id),
       name: user.name,
       email: user.email,
-    }; 
+    };
   } catch (error) {
     console.error('Error fetching user:', error);
     return null;
