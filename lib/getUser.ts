@@ -18,12 +18,10 @@ export async function getUser() {
     }
 
     return {
-      id: user._id.toString(),
+      id: String(user._id),
       name: user.name,
       email: user.email,
-    };
-  } catch (error) {
-    return null;
+    }; 
   }
 }
 

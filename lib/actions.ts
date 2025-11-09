@@ -2,14 +2,14 @@
 
 import Book from '@/models/bookModel';
 import User from '@/models/userModel';
-import Genre from '@/models/genreModel';
 import Member from '@/models/memberModel';
 import mongoose from 'mongoose';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { connectToMongoDB } from './db';
 import { bookFormSchema, signupFormSchema, loginFormSchema, memberFormSchema, type ActionResult } from './validations';
-import { createSession, deleteSession, login } from './auth';
+import { createSession, deleteSession } from './auth';
+import { login } from './auth-db';
 import bcrypt from 'bcryptjs';
 
 //---------------------------------------
@@ -244,7 +244,7 @@ export const signup = async (formData: FormData): Promise<ActionResult> => {
         await createSession(String(newUser._id));
         
         return { success: true, data: 'User created successfully' };
-    } catch (error) {
+    } catch {
         return {
             success: false,
             error: 'Database Error: Failed to create user.',
@@ -286,7 +286,7 @@ export const authenticate = async (formData: FormData): Promise<ActionResult> =>
         await createSession(user.id);
         
         return { success: true, data: 'Login successful' };
-    } catch (error) {
+    } catch {
         return {
             success: false,
             error: 'Failed to authenticate user.',

@@ -1,6 +1,5 @@
 import Book from '@/models/bookModel';
 import Genre from '@/models/genreModel';
-import User from '@/models/userModel';
 import Member from '@/models/memberModel';
 import { connectToMongoDB } from './db';
 import { serializeMongoDocument } from './utils';
@@ -100,7 +99,7 @@ export async function fetchBooksPages(query: string) {
       }
       
       // Directly serialize and ensure proper format - simple approach
-      const serializedGenre = genre.map((genreItem: any) => {
+      const serializedGenre = genre.map((genreItem: Record<string, unknown>) => {
         // With .lean(), genreItem should already be a plain object
         // But ensure _id is a string
         const _id = genreItem._id ? String(genreItem._id) : '';

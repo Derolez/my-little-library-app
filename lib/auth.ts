@@ -1,14 +1,11 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-import User from '@/models/userModel';
-import { connectToMongoDB } from './db';
-import bcrypt from 'bcryptjs';
 
 const secretKey = process.env.AUTH_SECRET || 'secret-key-change-in-production';
 const key = new TextEncoder().encode(secretKey);
 
-export async function encrypt(payload: any) {
+export async function encrypt(payload: Record<string, unknown>) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -16,32 +13,13 @@ export async function encrypt(payload: any) {
     .sign(key);
 }
 
-export async function decrypt(input: string): Promise<any> {
+export async function decrypt(input: string): Promise<Record<string, unknown>> {
   const { payload } = await jwtVerify(input, key, {
     algorithms: ['HS256'],
   });
   return payload;
 }
 
-export async function login(email: string, password: string) {
-  await connectToMongoDB();
-  
-  const user = await User.findOne({ email });
-  if (!user) {
-    return null;
-  }
-
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    return null;
-  }
-
-  return {
-    id: user._id.toString(),
-    name: user.name,
-    email: user.email,
-  };
-}
 
 export async function createSession(userId: string) {
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 1 day
@@ -57,7 +35,7 @@ export async function createSession(userId: string) {
   });
 }
 
-export async function getSession(): Promise<any> {
+export async function getSession(): Promise<Record<string, unknown> | null> {
   const cookieStore = await cookies();
   const session = cookieStore.get('session')?.value;
   if (!session) return null;
@@ -72,25 +50,27 @@ export async function updateSession(request: NextRequest) {
     const parsed = await decrypt(session);
     
     // Check if session is expired
-    if (parsed.expiresAt && new Date(parsed.expiresAt) < new Date()) {
+    const expiresAt = parsed.expiresAt as string | number | Date | undefined;
+    if (expiresAt && new Date(expiresAt) < new Date()) {
       const res = NextResponse.next();
       res.cookies.delete('session');
       return res;
     }
 
-    parsed.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    parsed.expiresAt = newExpiresAt;
     const res = NextResponse.next();
     res.cookies.set({
       name: 'session',
       value: await encrypt(parsed),
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      expires: parsed.expiresAt,
+      expires: newExpiresAt,
       sameSite: 'lax',
       path: '/',
     });
     return res;
-  } catch (error) {
+  } catch {
     // Invalid session, delete it
     const res = NextResponse.next();
     res.cookies.delete('session');

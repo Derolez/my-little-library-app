@@ -15,7 +15,6 @@ export default function LoginForm() {
   return (
     <form
       ref={ref}
-      // @ts-expect-error - Next.js 15 supports async functions in action prop
       action={async (formData: FormData) => {
         setError(null);
         setFieldErrors({});
@@ -97,7 +96,7 @@ export default function LoginForm() {
           Log in
         </button>
         <div className="mt-4 text-center text-sm">
-          <span className="text-gray-600">Don't have an account? </span>
+          <span className="text-gray-600">Don&apos;t have an account? </span>
           <Link href="/signup" className="text-blue-500 hover:text-blue-400">
             Sign up
           </Link>

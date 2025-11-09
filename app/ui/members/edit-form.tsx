@@ -31,7 +31,6 @@ export default function EditMemberForm({ member }: { member: MemberData }) {
     return (
         <form 
             ref={ref} 
-            // @ts-expect-error - Next.js 15 supports async functions in action prop
             action={async (formData: FormData) => {
                 setError(null);
                 setFieldErrors({});
