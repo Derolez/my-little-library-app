@@ -14,8 +14,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // If user is logged in and trying to access login/signup, redirect to dashboard
-  if (hasSession && (request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup'))) {
+  // If user is not logged in and trying to access signup, redirect to login
+  if (!hasSession && request.nextUrl.pathname.startsWith('/signup')) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  // If user is logged in and trying to access login, redirect to dashboard
+  if (hasSession && request.nextUrl.pathname.startsWith('/login')) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
